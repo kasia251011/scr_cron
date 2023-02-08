@@ -3,6 +3,7 @@
 struct task_node_t *head = NULL;
 int id_generator = 0;
 sigset_t set;
+pthread_mutex_t tasks_mutex;
 
 void task_manager_init() {
   sigfillset(&set);
@@ -28,14 +29,20 @@ int add_task(task_t * task) {
 
   struct task_node_t * task_node = malloc(sizeof(struct task_node_t));
 
+  pthread_mutex_lock(&tasks_mutex);
+
   task_node->task = task;
   task_node->next = head;
   head = task_node;
+
+  pthread_mutex_unlock(&tasks_mutex);
 
   return 0;
 }
 
 int delete_task(int task_id) {
+
+  pthread_mutex_lock(&tasks_mutex);
 
   struct task_node_t * current = head;
   struct task_node_t * previous = NULL;
@@ -69,22 +76,31 @@ int delete_task(int task_id) {
 
   free(current);
 
+  pthread_mutex_unlock(&tasks_mutex);
+
   return 0;
 
 }
 
 void for_each_task(for_each_func func, mqd_t mqd, size_t bytes) {
+
+  pthread_mutex_lock(&tasks_mutex);
+
   struct task_node_t * task_node = head;
   char  response [100];
-  while(task_node != NULL) {
 
+  while(task_node != NULL) {
+    char * program_args = concat_strings(task_node->task->program_args, task_node->task->program_argc);
     sprintf(response, "%-5d %-5d %s",
             task_node->task->id,
             task_node->task->seconds,
-            concat_strings(task_node->task->program_args, task_node->task->program_argc));
+            program_args);
     func(mqd, response, bytes, 0);
+    free(program_args);
     task_node = task_node->next;
   }
+
+  pthread_mutex_unlock(&tasks_mutex);
 }
 
 char * concat_strings(char str [][100], int count) {
@@ -155,6 +171,12 @@ void execute_program(sigval_t sigval)  {
   do
     waitpid(child_pid, &status, 0);
   while(!WIFEXITED(status));
+
+  for(int i = 0; args[i] != NULL; i++) {
+    free(args[i]);
+  }
+
+  free(args);
 
   printf("\tExecuted program\n");
 

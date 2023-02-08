@@ -1,4 +1,0 @@
-/opt/clion/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /media/sf_SCR/project_2
--- Configuring done
--- Generating done
--- Build files have been written to: /media/sf_SCR/project_2/cmake-build-debug

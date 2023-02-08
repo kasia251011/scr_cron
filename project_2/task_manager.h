@@ -11,6 +11,7 @@
 #include <spawn.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <pthread.h>
 //COMMAND STRUCTURE
 //Add task to list - add <command> <seconds>
 //Delete task - del <task-id>

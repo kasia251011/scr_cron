@@ -1,1 +1,0 @@
-/usr/bin/cc -g   CMakeFiles/project_2.dir/main.c.o CMakeFiles/project_2.dir/task_manager.c.o  -o project_2  -pthread -lrt 
