@@ -167,10 +167,6 @@ void execute_program(sigval_t sigval)  {
   char ** args = create_array_with_null(task->program_argc, task->program_args);
   pid_t child_pid;
   posix_spawn(&child_pid, task->program_args[0], NULL, NULL, args, NULL);
-  int status;
-  do
-    waitpid(child_pid, &status, 0);
-  while(!WIFEXITED(status));
 
   for(int i = 0; args[i] != NULL; i++) {
     free(args[i]);
@@ -181,5 +177,18 @@ void execute_program(sigval_t sigval)  {
   printf("\tExecuted program\n");
 
   delete_task(task->id);
+}
+
+void delete_linked_list() {
+  struct task_node_t *current;
+
+  while (head != NULL) {
+    current = head;
+    head = head->next;
+    timer_delete(*(current->task->timer));
+    free(current->task->timer);
+    free(current->task);
+    free(current);
+  }
 }
 

@@ -49,5 +49,6 @@ char * concat_strings(char str [][100], int count);
 
 int detect_task(task_t * task);
 void execute_program(sigval_t sigval);
+void delete_linked_list();
 
 #endif

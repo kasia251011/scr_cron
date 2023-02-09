@@ -24,16 +24,18 @@ void handler(int n) {
   printf("Server clean up\n");
   mq_unlink(CLIENT_WRITER);
   mq_unlink(SERVER_WRITER);
+  mq_close(server_reader);
+  mq_close(server_writer);
+  delete_linked_list();
   exit(0);
 }
 
 int main(int argc, char * argv[]) {
 
-  signal(SIGTERM, handler); //TODO: Move to only server
-
   mqd_t client_reader = mq_open(SERVER_WRITER, O_RDONLY, 0666, NULL);
   if (client_reader == (mqd_t) -1) {
 
+    signal(SIGTERM, handler);
 
     struct mq_attr attr;
     attr.mq_maxmsg = 10;
@@ -64,7 +66,7 @@ int main(int argc, char * argv[]) {
 
       if (strcmp(main_client_args->argv[1], "list") == 0) {
         mq_send(server_writer, "ID    TIME  TASK\n---------------------------------------\n", MAX_BYTES, 0);
-        for_each_task(mq_send, server_writer, MAX_BYTES, 0);
+        for_each_task(mq_send, server_writer, MAX_BYTES);
         mq_send(server_writer, EXIT_RESPONSE, MAX_BYTES, 0);
       }
 
@@ -100,6 +102,7 @@ int main(int argc, char * argv[]) {
     }
 
     mq_close(client_reader);
+    mq_close(client_writer);
   }
 
   return 0;
